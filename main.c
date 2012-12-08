@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <string.h>
+
+// gettext
 #include <libintl.h>
 #include <locale.h>
 
+// libxml2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+// pango using cairo as backend
 #include <pango/pangocairo.h>
 
 //#include <GL/gl.h>
@@ -86,23 +90,26 @@ void onExit(){
 }
 
 int main(int argc, char *argv[]){
+	// setup window and OpenGL context with glut
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(WIDTH, HEIGHT);
-	glutCreateWindow("pango_gettext_its_test");
+	glutCreateWindow("its_gettext_pango_opengl");
 	glutDisplayFunc(render);
 
+	// setup gettext to use po subdirectory instead of std /usr/share/locale
 	setlocale(LC_ALL, "");
 	bindtextdomain("hoplite", "po");
-	textdomain("hoplite");
+	textdomain("hoplite"); // set std domain -> use hoplite.mo
 
+	// init xml parser
 	xmlDoc *doc = xmlReadFile("hele_infantry_spearman_b.xml", NULL, 0);
 	if(!doc){
-		fprintf(stderr, "could not parse %s\n", argv[1]);
+		perror("could not parse data xml");
 		return 1;
 	}
 	xmlNode *root = xmlDocGetRootElement(doc);
-	
+
 	// cairo stuff
 	int channels = 4;
 	unsigned char *surf_data = calloc(channels * WIDTH * HEIGHT, sizeof(unsigned char));
@@ -123,7 +130,7 @@ int main(int argc, char *argv[]){
 
 	// done drawing
 	cairo_destroy(cr);
-	
+
 	// OpenGL stuff
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(1, &tex_id);
@@ -146,7 +153,7 @@ int main(int argc, char *argv[]){
 	cairo_surface_destroy(surf);
 	free(surf_data);
 
-	// cleanup libxml
+	// cleanup xml parser
 	xmlFreeDoc(doc);
 	xmlCleanupParser();
 
